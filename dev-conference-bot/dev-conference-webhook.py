@@ -17,36 +17,16 @@ db_connection = pymysql.connect(
     cursorclass=pymysql.cursors.DictCursor
 )  # db 접근 하기 위한 정보
 
-# WEBHOOK = 'https://discord.com/api/webhooks/1265874096177156196/a-SQDMzKcDNA7uR2Vf5EryCl7OzFMS7f3R9QYoCdDLIgAjdsFPJYjbDrf3xiXaQsTBqz'
 WEBHOOK = 'https://discord.com/api/webhooks/1265875438807289958/eHenaHiUhpk7Y93peMKPXA85n_2no25IskGskS8CYDfqb_6doIUjZokdL0bu7enODUua'
-
 
 def lambda_handler(event, context):
     print(f'람다 시작 시각:{datetime.now()}')
 
-    delete_past_event()
     asyncio.run(save_and_send_conference_message())
     return {
         'statusCode': 200,
         'body': json.dumps('Hello from Lambda!')
     }
-
-
-def delete_past_event():
-    cursor = db_connection.cursor()
-
-    today = datetime.today().strftime('%Y-%m-%d')  # YYYY-MM-DD
-    delete_query = "DELETE FROM conference WHERE end_date_time > %s"
-    cursor.execute(delete_query, (today,))
-
-    # 변경사항 커밋
-    db_connection.commit()
-
-    print(f"{cursor.rowcount}개의 행이 삭제되었습니다.")
-
-    # 커서 닫기
-    cursor.close()
-
 
 async def save_and_send_conference_message():
     new_dev_events = scrape_events()
@@ -91,7 +71,7 @@ def get_new_events(dev_events):
 
     pre_event_ids = {event['id'] for event in pre_dev_events}
     new_dev_events = [event for event in dev_events if event['id'] not in pre_event_ids]
-    print_new_events(new_dev_events)
+    # print_new_events(new_dev_events)
 
     return new_dev_events
 
